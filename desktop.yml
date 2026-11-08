@@ -1,0 +1,101 @@
+name: Build macOS + Linux (free PC app)
+# Put this file in your repo at .github/workflows/desktop.yml
+# (the Windows installer is built by windows.yml, the Android APK by build.yml)
+on:
+  workflow_dispatch:
+  push:
+    paths: ["DjApp/desktop/**", "DjApp/app/src/main/cpp/**", "DjApp*.zip", ".github/workflows/desktop.yml"]
+permissions:
+  contents: read
+
+jobs:
+  engine-tests:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: Unpack newest project zip (if the project is committed as a zip)
+        run: |
+          ZIP=$(for f in DjApp*.zip; do [ -f "$f" ] && echo "$(git log -1 --format=%ct -- "$f") $f"; done | sort -n | tail -1 | cut -d' ' -f2-)
+          if [ -n "$ZIP" ]; then rm -rf DjApp; unzip -q -o "$ZIP"; fi
+          test -f DjApp/desktop/build.gradle.kts || { echo "::error::DjApp/desktop is missing (old project version)"; exit 1; }
+      - name: Audio tests (bass amp, limiter, EQ, interpolation, declick)
+        working-directory: DjApp/tools
+        run: g++ -O2 -std=c++17 -I../app/src/main/cpp dsp_test.cpp -o dsp_test && ./dsp_test
+      - name: Build the engine and run the offline smoke test (no sound card needed)
+        working-directory: DjApp
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq cmake
+          cmake -S app/src/main/cpp -B bld -DCMAKE_BUILD_TYPE=Release
+          cmake --build bld --config Release
+          python3 -I tools/desktop_engine_smoke.py
+
+  linux:
+    needs: engine-tests
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: Unpack newest project zip (if the project is committed as a zip)
+        run: |
+          ZIP=$(for f in DjApp*.zip; do [ -f "$f" ] && echo "$(git log -1 --format=%ct -- "$f") $f"; done | sort -n | tail -1 | cut -d' ' -f2-)
+          if [ -n "$ZIP" ]; then rm -rf DjApp; unzip -q -o "$ZIP"; fi
+          test -f DjApp/desktop/build.gradle.kts || { echo "::error::DjApp/desktop is missing (old project version)"; exit 1; }
+      - name: Install build tools (cmake + what jpackage needs for .deb)
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq cmake fakeroot dpkg-dev
+      - name: Build the audio engine (libdjengine.so)
+        run: |
+          cmake -S DjApp/app/src/main/cpp -B build -DCMAKE_BUILD_TYPE=Release
+          cmake --build build --config Release
+          mkdir -p DjApp/desktop/resources/linux-x64
+          cp build/libdjengine.so DjApp/desktop/resources/linux-x64/
+      - name: Cache AI model (SCNet-large, 45 MB, downloaded by Gradle at build time)
+        uses: actions/cache@v4
+        with:
+          path: DjApp/desktop/resources/common/models/scnet-large.int8.onnx
+          key: scnet-large-int8-onnx-desktop-v1
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 17 }
+      - uses: gradle/actions/setup-gradle@v4
+        with: { gradle-version: 8.7 }
+      - name: Build the .deb installer
+        working-directory: DjApp/desktop
+        run: gradle packageDeb --stacktrace
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MAXIDO-DJ-Linux
+          path: DjApp/desktop/build/compose/binaries/main/deb/*.deb
+
+  macos:
+    needs: engine-tests
+    runs-on: macos-14               # Apple Silicon: matches resources/macos-arm64 and the macosx-arm64 FFmpeg natives
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: Unpack newest project zip (if the project is committed as a zip)
+        run: |
+          ZIP=$(for f in DjApp*.zip; do [ -f "$f" ] && echo "$(git log -1 --format=%ct -- "$f") $f"; done | sort -n | tail -1 | cut -d' ' -f2-)
+          if [ -n "$ZIP" ]; then rm -rf DjApp; unzip -q -o "$ZIP"; fi
+          test -f DjApp/desktop/build.gradle.kts || { echo "::error::DjApp/desktop is missing (old project version)"; exit 1; }
+      - name: Build the audio engine (libdjengine.dylib)
+        run: |
+          cmake -S DjApp/app/src/main/cpp -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES=arm64
+          cmake --build build --config Release
+          mkdir -p DjApp/desktop/resources/macos-arm64
+          cp build/libdjengine.dylib DjApp/desktop/resources/macos-arm64/
+      - name: Cache AI model (SCNet-large, 45 MB, downloaded by Gradle at build time)
+        uses: actions/cache@v4
+        with:
+          path: DjApp/desktop/resources/common/models/scnet-large.int8.onnx
+          key: scnet-large-int8-onnx-desktop-v1
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 17 }
+      - uses: gradle/actions/setup-gradle@v4
+        with: { gradle-version: 8.7 }
+      - name: Build the .dmg installer
+        working-directory: DjApp/desktop
+        run: gradle packageDmg --stacktrace
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MAXIDO-DJ-macOS
+          path: DjApp/desktop/build/compose/binaries/main/dmg/*.dmg
