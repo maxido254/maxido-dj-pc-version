@@ -1,0 +1,69 @@
+name: Build Windows (free PC app)
+# Put this file in your repo at .github/workflows/windows.yml (replace the old one).
+# Then: Actions > "Build Windows (free PC app)" > Run workflow, and download the artifacts.
+on:
+  workflow_dispatch:
+  push:
+    paths: ["DjApp/desktop/**", "DjApp/app/src/main/cpp/**", "DjApp*.zip", ".github/workflows/windows.yml"]
+permissions:
+  contents: read
+
+jobs:
+  engine-tests:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: Unpack newest project zip (if the project is committed as a zip)
+        run: |
+          ZIP=$(for f in DjApp*.zip; do [ -f "$f" ] && echo "$(git log -1 --format=%ct -- "$f") $f"; done | sort -n | tail -1 | cut -d' ' -f2-)
+          if [ -n "$ZIP" ]; then rm -rf DjApp; unzip -q -o "$ZIP"; fi
+      - name: Audio tests (bass amp, limiter, EQ, interpolation, declick)
+        working-directory: DjApp/tools
+        run: g++ -O2 -std=c++17 -I../app/src/main/cpp dsp_test.cpp -o dsp_test && ./dsp_test
+
+  windows:
+    needs: engine-tests
+    runs-on: windows-2022          # has the WiX toolset that jpackage needs for .msi / .exe
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: Unpack newest project zip (if the project is committed as a zip)
+        shell: bash
+        run: |
+          ZIP=$(for f in DjApp*.zip; do [ -f "$f" ] && echo "$(git log -1 --format=%ct -- "$f") $f"; done | sort -n | tail -1 | cut -d' ' -f2-)
+          if [ -n "$ZIP" ]; then rm -rf DjApp; unzip -q -o "$ZIP"; fi
+          test -f DjApp/desktop/build.gradle.kts || { echo "::error::DjApp/desktop is missing (old project version)"; exit 1; }
+      - name: Build the audio engine (djengine.dll)
+        shell: pwsh
+        run: |
+          cmake -S DjApp/app/src/main/cpp -B build -A x64
+          cmake --build build --config Release
+          New-Item -ItemType Directory -Force DjApp/desktop/resources/windows-x64 | Out-Null
+          Copy-Item build/Release/djengine.dll DjApp/desktop/resources/windows-x64/
+      - name: Cache AI model (SCNet-large, 45 MB, downloaded by Gradle at build time)
+        uses: actions/cache@v4
+        with:
+          path: DjApp/desktop/resources/common/models/scnet-large.int8.onnx
+          key: scnet-large-int8-onnx-desktop-v1
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 17 }
+      - uses: gradle/actions/setup-gradle@v4
+        with: { gradle-version: 8.7 }
+      - name: Build the installers and the portable app folder
+        working-directory: DjApp/desktop
+        run: gradle packageMsi packageExe createDistributable --stacktrace
+      - name: Zip the portable app (unzip anywhere, run MAXIDO DJ.exe, no install needed)
+        shell: pwsh
+        run: |
+          Compress-Archive -Path "DjApp/desktop/build/compose/binaries/main/app/MAXIDO DJ" -DestinationPath "MAXIDO-DJ-Windows-portable.zip"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MAXIDO-DJ-Windows
+          path: |
+            DjApp/desktop/build/compose/binaries/main/msi/*.msi
+            DjApp/desktop/build/compose/binaries/main/exe/*.exe
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MAXIDO-DJ-Windows-portable
+          path: MAXIDO-DJ-Windows-portable.zip
