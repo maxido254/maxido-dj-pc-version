@@ -68,20 +68,30 @@ jobs:
           Expand-Archive gradle.zip -DestinationPath "$env:RUNNER_TEMP"
           "$env:RUNNER_TEMP\gradle-8.7\bin" | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
       - uses: gradle/actions/setup-gradle@v4      # no version here: only handles caching, no download
-      - name: Build the installers and the portable app folder
+      - name: Build the portable app folder (compiles the app; no installer tools needed)
         working-directory: DjApp/desktop
-        run: gradle packageMsi packageExe createDistributable --stacktrace
+        run: gradle createDistributable --stacktrace
       - name: Zip the portable app (unzip anywhere, run MAXIDO DJ.exe, no install needed)
         shell: pwsh
         run: |
           Compress-Archive -Path "DjApp/desktop/build/compose/binaries/main/app/MAXIDO DJ" -DestinationPath "MAXIDO-DJ-Windows-portable.zip"
       - uses: actions/upload-artifact@v4
         with:
+          name: MAXIDO-DJ-Windows-portable
+          path: MAXIDO-DJ-Windows-portable.zip
+      - name: Build the .msi / .exe installers (with retries, because the WiX download from github.com sometimes times out)
+        working-directory: DjApp/desktop
+        shell: pwsh
+        run: |
+          $ok = $false
+          for ($i = 1; $i -le 4 -and -not $ok; $i++) {
+            gradle packageMsi packageExe --stacktrace
+            if ($LASTEXITCODE -eq 0) { $ok = $true } else { Write-Host "Attempt $i failed, retrying..."; Start-Sleep -Seconds (10 * $i) }
+          }
+          if (-not $ok) { throw "Installer build failed after 4 attempts" }
+      - uses: actions/upload-artifact@v4
+        with:
           name: MAXIDO-DJ-Windows
           path: |
             DjApp/desktop/build/compose/binaries/main/msi/*.msi
             DjApp/desktop/build/compose/binaries/main/exe/*.exe
-      - uses: actions/upload-artifact@v4
-        with:
-          name: MAXIDO-DJ-Windows-portable
-          path: MAXIDO-DJ-Windows-portable.zip
