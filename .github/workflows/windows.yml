@@ -70,7 +70,27 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4      # no version here: only handles caching, no download
       - name: Build the portable app folder (compiles the app; no installer tools needed)
         working-directory: DjApp/desktop
-        run: gradle createDistributable --stacktrace
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Continue'
+          $log = Join-Path $env:GITHUB_WORKSPACE "gradle-build.log"
+          gradle createDistributable --stacktrace 2>&1 | ForEach-Object { "$_" } | Tee-Object -FilePath $log
+          $code = $LASTEXITCODE
+          if ($code -ne 0) {
+            Write-Host ""
+            Write-Host "================ SHORT SUMMARY OF WHAT WENT WRONG (screenshot this part) ================"
+            Select-String -Path $log -Pattern '^e: ' | ForEach-Object { $_.Line }
+            Select-String -Path $log -Pattern 'What went wrong:' -Context 0,5 | ForEach-Object { $_.Line; $_.Context.PostContext }
+            Write-Host "================ END OF SUMMARY ================"
+            exit $code
+          }
+      - name: Keep the build log (download it from the run page if you need it)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gradle-build-log
+          path: gradle-build.log
+          if-no-files-found: ignore
       - name: Zip the portable app (unzip anywhere, run MAXIDO DJ.exe, no install needed)
         shell: pwsh
         run: |
