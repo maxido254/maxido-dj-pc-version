@@ -4,20 +4,28 @@ name: Build Windows (free PC app)
 on:
   workflow_dispatch:
   push:
-    paths: ["DjApp/desktop/**", "DjApp/app/src/main/cpp/**", "DjApp*.zip", ".github/workflows/windows.yml"]
+    paths: ["DjApp/desktop/**", "DjApp/app/src/main/cpp/**", "DjApp/tools/**", ".github/workflows/windows.yml", "tools/**", "docs/**"]
+  pull_request:
+    paths: ["DjApp/desktop/**", "DjApp/app/src/main/cpp/**", "DjApp/tools/**", ".github/workflows/windows.yml", "tools/**", "docs/**"]
 permissions:
   contents: read
 
 jobs:
+  source-integrity:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: node tools/verify-source.mjs
   engine-tests:
+    needs: source-integrity
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
-      - name: Unpack newest project zip (if the project is committed as a zip)
-        run: |
-          ZIP=$(for f in DjApp*.zip; do [ -f "$f" ] && echo "$(git log -1 --format=%ct -- "$f") $f"; done | sort -n | tail -1 | cut -d' ' -f2-)
-          if [ -n "$ZIP" ]; then rm -rf DjApp; unzip -q -o "$ZIP"; fi
+      - name: Verify checked-in source
+        run: test -f DjApp/tools/dsp_test.cpp
       - name: Audio tests (bass amp, limiter, EQ, interpolation, declick)
         working-directory: DjApp/tools
         run: g++ -O2 -std=c++17 -I../app/src/main/cpp dsp_test.cpp -o dsp_test && ./dsp_test
@@ -28,12 +36,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
-      - name: Unpack newest project zip (if the project is committed as a zip)
+      - name: Verify checked-in source
         shell: bash
-        run: |
-          ZIP=$(for f in DjApp*.zip; do [ -f "$f" ] && echo "$(git log -1 --format=%ct -- "$f") $f"; done | sort -n | tail -1 | cut -d' ' -f2-)
-          if [ -n "$ZIP" ]; then rm -rf DjApp; unzip -q -o "$ZIP"; fi
-          test -f DjApp/desktop/build.gradle.kts || { echo "::error::DjApp/desktop is missing (old project version)"; exit 1; }
+        run: test -f DjApp/desktop/build.gradle.kts
       - name: Build the audio engine (djengine.dll)
         shell: pwsh
         run: |
