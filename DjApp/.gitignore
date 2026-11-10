@@ -1,0 +1,32 @@
+# The AI model (SCNet-large, 45 MB) is fetched at build time by Gradle, so it is not committed
+app/src/main/assets/scnet.int8.onnx
+app/src/main/assets/scnet-large.int8.onnx
+app/src/main/assets/*.part
+.gradle/
+build/
+app/build/
+local.properties
+*.iml
+.idea/
+
+# billing server secrets and data: never commit
+billing-server/keys/
+billing-server/data/
+billing-server/.env
+
+# release signing: NEVER upload
+*.jks
+*.keystore
+GITHUB-SECRETS.txt
+
+billing-server/issued-codes.jsonl
+
+billing-server/check/paystack.csv
+billing-server/check/claims.txt
+billing-server/check/reconcile-report.txt
+desktop/build/
+desktop/.gradle/
+desktop/resources/*/*.dll
+desktop/resources/*/*.so
+desktop/resources/*/*.dylib
+build/
