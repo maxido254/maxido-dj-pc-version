@@ -96,14 +96,14 @@ jobs:
           name: gradle-build-log
           path: gradle-build.log
           if-no-files-found: ignore
-      - name: Zip the portable app (unzip anywhere, run MAXIDO DJ.exe, no install needed)
+      - name: Zip the portable app (unzip anywhere, run MAXXIDO DJ.exe, no install needed)
         shell: pwsh
         run: |
-          Compress-Archive -Path "DjApp/desktop/build/compose/binaries/main/app/MAXIDO DJ" -DestinationPath "MAXIDO-DJ-Windows-portable.zip"
+          Compress-Archive -Path "DjApp/desktop/build/compose/binaries/main/app/MAXXIDO DJ" -DestinationPath "MAXXIDO-DJ-Windows-portable.zip"
       - uses: actions/upload-artifact@v4
         with:
-          name: MAXIDO-DJ-Windows-portable
-          path: MAXIDO-DJ-Windows-portable.zip
+          name: MAXXIDO-DJ-Windows-portable
+          path: MAXXIDO-DJ-Windows-portable.zip
       - name: Build the .msi / .exe installers (with retries, because the WiX download from github.com sometimes times out)
         working-directory: DjApp/desktop
         shell: pwsh
@@ -116,7 +116,7 @@ jobs:
           if (-not $ok) { throw "Installer build failed after 4 attempts" }
       - uses: actions/upload-artifact@v4
         with:
-          name: MAXIDO-DJ-Windows
+          name: MAXXIDO-DJ-Windows
           path: |
             DjApp/desktop/build/compose/binaries/main/msi/*.msi
             DjApp/desktop/build/compose/binaries/main/exe/*.exe
@@ -125,9 +125,9 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: windows-v1.0.${{ github.run_number }}
-          name: MAXIDO DJ for Windows 1.0.${{ github.run_number }}
-          body: "Portable zip: unzip anywhere and run MAXIDO DJ.exe. The .msi and .exe files are installers."
+          name: MAXXIDO DJ for Windows 1.0.${{ github.run_number }}
+          body: "Portable zip: unzip anywhere and run MAXXIDO DJ.exe. The .msi and .exe files are installers."
           files: |
-            MAXIDO-DJ-Windows-portable.zip
+            MAXXIDO-DJ-Windows-portable.zip
             DjApp/desktop/build/compose/binaries/main/msi/*.msi
             DjApp/desktop/build/compose/binaries/main/exe/*.exe
