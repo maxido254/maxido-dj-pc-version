@@ -1,2 +1,2 @@
 # maxido-dj-pc-version
-dj app alternite to serato and virtual dj
+dj app alternate to serato and virtual dj
