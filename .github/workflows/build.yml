@@ -107,14 +107,15 @@ jobs:
           name: ${{ env.APK_NAME }}
           path: DjApp/${{ env.APK_NAME }}.apk
       - name: Publish the public download
-        if: ${{ github.event.inputs.publish == 'true' && env.SIGNED == 'release' }}
+        if: ${{ github.event.inputs.publish == 'true' }}
         uses: softprops/action-gh-release@v2
         with:
+          prerelease: ${{ env.SIGNED != 'release' }}
           tag_name: v1.0.${{ github.run_number }}
           name: MAXIDO DJ 1.0.${{ github.run_number }}
           files: DjApp/${{ env.APK_NAME }}.apk
           generate_release_notes: true
-      - name: Explain why nothing was published
+      - name: Note about the signing key
         if: ${{ github.event.inputs.publish == 'true' && env.SIGNED != 'release' }}
         run: |
-          echo "::warning::Not published - add the KEYSTORE secrets first (see RELEASE.md)."
+          echo "::warning::Published with the debug key. Add the KEYSTORE secrets (see RELEASE.md) so later versions can update over this one."

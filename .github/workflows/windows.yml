@@ -3,10 +3,15 @@ name: Build Windows (free PC app)
 # Then: Actions > "Build Windows (free PC app)" > Run workflow, and download the artifacts.
 on:
   workflow_dispatch:
+    inputs:
+      publish:
+        description: "Publish the Windows app (portable zip + installers) as a GitHub Release"
+        type: boolean
+        default: false
   push:
     paths: ["DjApp/desktop/**", "DjApp/app/src/main/cpp/**", "DjApp*.zip", ".github/workflows/windows.yml"]
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   engine-tests:
@@ -113,5 +118,16 @@ jobs:
         with:
           name: MAXIDO-DJ-Windows
           path: |
+            DjApp/desktop/build/compose/binaries/main/msi/*.msi
+            DjApp/desktop/build/compose/binaries/main/exe/*.exe
+      - name: Publish the Windows download
+        if: ${{ github.event.inputs.publish == 'true' }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: windows-v1.0.${{ github.run_number }}
+          name: MAXIDO DJ for Windows 1.0.${{ github.run_number }}
+          body: "Portable zip: unzip anywhere and run MAXIDO DJ.exe. The .msi and .exe files are installers."
+          files: |
+            MAXIDO-DJ-Windows-portable.zip
             DjApp/desktop/build/compose/binaries/main/msi/*.msi
             DjApp/desktop/build/compose/binaries/main/exe/*.exe
