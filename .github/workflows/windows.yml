@@ -96,21 +96,13 @@ jobs:
           name: gradle-build-log
           path: gradle-build.log
           if-no-files-found: ignore
-      - name: Zip the portable app (unzip anywhere, run MAXXIDO DJ.exe, no install needed)
-        shell: pwsh
-        run: |
-          Compress-Archive -Path "DjApp/desktop/build/compose/binaries/main/app/MAXXIDO DJ" -DestinationPath "MAXXIDO-DJ-Windows-portable.zip"
-      - uses: actions/upload-artifact@v4
-        with:
-          name: MAXXIDO-DJ-Windows-portable
-          path: MAXXIDO-DJ-Windows-portable.zip
-      - name: Build the .msi / .exe installers (with retries, because the WiX download from github.com sometimes times out)
+      - name: Build the .msi installer (with retries, because the WiX download from github.com sometimes times out)
         working-directory: DjApp/desktop
         shell: pwsh
         run: |
           $ok = $false
           for ($i = 1; $i -le 4 -and -not $ok; $i++) {
-            gradle packageMsi packageExe --stacktrace
+            gradle packageMsi --stacktrace
             if ($LASTEXITCODE -eq 0) { $ok = $true } else { Write-Host "Attempt $i failed, retrying..."; Start-Sleep -Seconds (10 * $i) }
           }
           if (-not $ok) { throw "Installer build failed after 4 attempts" }
@@ -119,12 +111,15 @@ jobs:
           name: MAXXIDO-DJ-Windows
           path: |
             DjApp/desktop/build/compose/binaries/main/msi/*.msi
-            DjApp/desktop/build/compose/binaries/main/exe/*.exe
       - name: Publish the Windows download (one release only, v1.0.0.0.1)
         if: ${{ github.event.inputs.publish == 'true' }}
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          cp DjApp/desktop/build/compose/binaries/main/msi/*.msi MAXXIDO-DJ.msi
           gh release view v1.0.0.0.1 >/dev/null 2>&1 || gh release create v1.0.0.0.1 --title "MAXXIDO DJ" --notes "MAXXIDO DJ for Android and Windows." --latest
-          gh release upload v1.0.0.0.1 MAXXIDO-DJ-Windows-portable.zip DjApp/desktop/build/compose/binaries/main/msi/*.msi DjApp/desktop/build/compose/binaries/main/exe/*.exe --clobber
+          gh release upload v1.0.0.0.1 MAXXIDO-DJ.msi --clobber
+          for old in MAXXIDO-DJ-Windows-portable.zip MAXXIDO.DJ-1.0.0.exe MAXXIDO.DJ-1.0.0.msi; do
+            gh release delete-asset v1.0.0.0.1 "$old" --yes || true
+          done
