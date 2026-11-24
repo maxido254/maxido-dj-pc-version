@@ -90,7 +90,7 @@ jobs:
           unzip -lv "$APK" | awk 'NR>3 && NF>=8 {split($8,a,"/"); d[a[1]"/"a[2]]+=$1} END {for (k in d) printf "%7.1f  %s\n", d[k]/1048576, k}' | sort -rn | head -12
       - name: Name the APK after the zip it was built from
         run: |
-          APK_NAME="MAXXIDO-DJ_${ZIP_NAME}_run${GITHUB_RUN_NUMBER}"
+          APK_NAME="MAXXIDO-DJ"
           cp DjApp/app/build/outputs/apk/release/app-release.apk "DjApp/${APK_NAME}.apk"
           echo "APK_NAME=$APK_NAME" >> "$GITHUB_ENV"
           {
@@ -112,7 +112,7 @@ jobs:
         with:
           prerelease: ${{ env.SIGNED != 'release' }}
           tag_name: v1.0.${{ github.run_number }}
-          name: MAXXIDO DJ 1.0.${{ github.run_number }}
+          name: MAXXIDO DJ
           files: DjApp/${{ env.APK_NAME }}.apk
           generate_release_notes: true
       - name: Note about the signing key

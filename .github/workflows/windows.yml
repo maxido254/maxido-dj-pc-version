@@ -125,7 +125,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: windows-v1.0.${{ github.run_number }}
-          name: MAXXIDO DJ for Windows 1.0.${{ github.run_number }}
+          name: MAXXIDO DJ for Windows
           body: "Portable zip: unzip anywhere and run MAXXIDO DJ.exe. The .msi and .exe files are installers."
           files: |
             MAXXIDO-DJ-Windows-portable.zip
