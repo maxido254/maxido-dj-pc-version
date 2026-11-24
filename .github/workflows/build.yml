@@ -106,7 +106,7 @@ jobs:
         with:
           name: ${{ env.APK_NAME }}
           path: DjApp/${{ env.APK_NAME }}.apk
-      - name: Publish the public download (one release only: v1.0.0.0.1)
+      - name: Publish the public download (one release only, v1.0.0.0.1)
         if: ${{ github.event.inputs.publish == 'true' }}
         env:
           GH_TOKEN: ${{ github.token }}
