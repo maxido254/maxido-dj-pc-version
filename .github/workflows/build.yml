@@ -106,15 +106,13 @@ jobs:
         with:
           name: ${{ env.APK_NAME }}
           path: DjApp/${{ env.APK_NAME }}.apk
-      - name: Publish the public download
+      - name: Publish the public download (one release only: v1.0.0.0.1)
         if: ${{ github.event.inputs.publish == 'true' }}
-        uses: softprops/action-gh-release@v2
-        with:
-          prerelease: ${{ env.SIGNED != 'release' }}
-          tag_name: v1.0.${{ github.run_number }}
-          name: MAXXIDO DJ
-          files: DjApp/${{ env.APK_NAME }}.apk
-          generate_release_notes: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view v1.0.0.0.1 >/dev/null 2>&1 || gh release create v1.0.0.0.1 --title "MAXXIDO DJ" --notes "MAXXIDO DJ for Android and Windows." --latest
+          gh release upload v1.0.0.0.1 "DjApp/${APK_NAME}.apk" --clobber
       - name: Note about the signing key
         if: ${{ github.event.inputs.publish == 'true' && env.SIGNED != 'release' }}
         run: |

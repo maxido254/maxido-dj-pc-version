@@ -1,0 +1,20 @@
+name: Keep only one release
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete every release except v1.0.0.0.1 (and their tags)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh release view v1.0.0.0.1 >/dev/null
+          gh release list --limit 200 --json tagName --jq '.[].tagName' | grep -vx 'v1.0.0.0.1' | while read -r t; do
+            echo "deleting $t"
+            gh release delete "$t" --cleanup-tag --yes
+          done
+          gh release list
