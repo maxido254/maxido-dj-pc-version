@@ -7,6 +7,7 @@ Reads   <store>/items/skins/<id>.json              a skin (theme): "name" + colo
 Writes  <store>/catalog.json and <store>/files/    what the apps download. With base_url (https://.../store) the catalog holds full
         addresses, which is what the app needs; without it they are relative (files/x.zip).
 
+The ?v= part makes every changed file a new address, so a CDN can never serve an old copy next to a new catalog.
 Bump "version" (in the skin file / pack.json) to make the apps show UPDATE. Output is byte-for-byte repeatable, so an unchanged
 store produces no changes. Any mistake stops the build with a clear message (nothing half-published).
 """
@@ -41,7 +42,7 @@ def build(store, base=""):
         if iid in seen: err(f"{kind} id '{iid}' is used twice"); return
         seen.add(iid)
         items.append({"id": iid, "type": kind, "name": meta.get("name", iid), "author": meta.get("author", ""), "desc": meta.get("desc", ""),
-                      "version": int(meta.get("version", 1)), "url": (base.rstrip("/") + "/" if base else "") + "files/" + os.path.basename(path), "sha256": sha(path), "size": os.path.getsize(path)})
+                      "version": int(meta.get("version", 1)), "url": (base.rstrip("/") + "/" if base else "") + "files/" + os.path.basename(path) + "?v=" + sha(path)[:12], "sha256": sha(path), "size": os.path.getsize(path)})
 
     # ---------------- skins
     sk = os.path.join(src, "skins")

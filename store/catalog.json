@@ -8,7 +8,7 @@
    "author": "Maxido",
    "desc": "Format test: 2 pads. Copy this folder to make your own pack.",
    "version": 1,
-   "url": "https://raw.githubusercontent.com/maxido254/maxido-dj-pc-version/main/store/files/starter-demo.zip",
+   "url": "https://raw.githubusercontent.com/maxido254/maxido-dj-pc-version/main/store/files/starter-demo.zip?v=78411d3c19a3",
    "sha256": "78411d3c19a323e6f86afc67bb578452ee31f2b303e6950520e1df54364176c0",
    "size": 312518
   },
@@ -19,7 +19,7 @@
    "author": "",
    "desc": "",
    "version": 1,
-   "url": "https://raw.githubusercontent.com/maxido254/maxido-dj-pc-version/main/store/files/emerald-night.json",
+   "url": "https://raw.githubusercontent.com/maxido254/maxido-dj-pc-version/main/store/files/emerald-night.json?v=67ccd8c9b4de",
    "sha256": "67ccd8c9b4def3932e537042072656ef97f017398b21d5b1930eec34918fed0b",
    "size": 342
   },
@@ -30,7 +30,7 @@
    "author": "",
    "desc": "",
    "version": 1,
-   "url": "https://raw.githubusercontent.com/maxido254/maxido-dj-pc-version/main/store/files/neon-red.json",
+   "url": "https://raw.githubusercontent.com/maxido254/maxido-dj-pc-version/main/store/files/neon-red.json?v=2117a7a95614",
    "sha256": "2117a7a95614a23be6b6378e9c0e31ec2d9d78de92ed8f3c27ef55398d6b668b",
    "size": 332
   }
