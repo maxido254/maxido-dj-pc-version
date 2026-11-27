@@ -1,0 +1,2 @@
+{ "id": "starter-demo", "name": "Starter Demo Pack", "author": "Maxido", "desc": "Format test: 2 pads. Copy this folder to make your own pack.", "version": 1,
+  "pads": [ { "name": "Glass", "file": "glass_break.ogg" }, { "name": "Pull Up", "file": "pull_up.ogg" } ] }

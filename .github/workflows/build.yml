@@ -38,6 +38,13 @@ jobs:
           done
           grep -q "setEq" DjApp/app/src/main/cpp/engine.cpp || { echo "::error::No EQ in $ZIP: OLD version"; exit 1; }
           echo "Building the newest version"
+      - name: Point the app at this repo's store (no website needed)
+        run: |
+          URL="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${{ github.event.repository.default_branch }}/store/catalog.json"
+          F=DjApp/app/src/main/java/com/example/djapp/Store.kt
+          sed -i "s|https://YOUR-NAME.github.io/maxido-store/catalog.json|${URL}|" "$F"
+          grep -q "raw.githubusercontent.com" "$F" || { echo "::error::Store.kt has no store address placeholder"; exit 1; }
+          echo "Store address in this APK: ${URL}" >> "$GITHUB_STEP_SUMMARY"
       - name: Cache AI model (SCNet-large, 45 MB, downloaded by Gradle at build time)
         uses: actions/cache@v4
         with:

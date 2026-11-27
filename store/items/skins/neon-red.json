@@ -1,0 +1,2 @@
+{ "id": "neon-red", "name": "Neon Red", "bg": "#0A0506", "panel": "#140B0D", "btnTop": "#2A1A1D", "btnBottom": "#1B1012", "line": "#3A2327", "text": "#BD9098", "card": "#2A1A1D",
+  "deckA": "#FF3B4E", "deckADark": "#4A0F18", "deckALight": "#FF8A96", "deckB": "#FFB020", "deckBDark": "#4A3208", "deckBLight": "#FFD27A" }

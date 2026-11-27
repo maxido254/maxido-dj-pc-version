@@ -1,0 +1,16 @@
+name: Publish store
+# Add or change files in store/items/ (themes as .json in skins/, sampler packs as .zip in packs/): this rebuilds store/catalog.json in about a minute.
+on:
+  push:
+    paths: ["store/items/**", "store/build_catalog.py"]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  store:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: Build and publish the store
+        run: bash store/publish_store.sh

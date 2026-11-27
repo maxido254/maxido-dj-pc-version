@@ -1,0 +1,17 @@
+{
+ "bg": "#0A0506",
+ "btnBottom": "#1B1012",
+ "btnTop": "#2A1A1D",
+ "card": "#2A1A1D",
+ "deckA": "#FF3B4E",
+ "deckADark": "#4A0F18",
+ "deckALight": "#FF8A96",
+ "deckB": "#FFB020",
+ "deckBDark": "#4A3208",
+ "deckBLight": "#FFD27A",
+ "id": "neon-red",
+ "line": "#3A2327",
+ "name": "Neon Red",
+ "panel": "#140B0D",
+ "text": "#BD9098"
+}

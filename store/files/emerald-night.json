@@ -1,0 +1,17 @@
+{
+ "bg": "#04100C",
+ "btnBottom": "#0D201B",
+ "btnTop": "#14302A",
+ "card": "#14302A",
+ "deckA": "#1DE9A0",
+ "deckADark": "#0A3D2C",
+ "deckALight": "#7BF5CC",
+ "deckB": "#00B8D4",
+ "deckBDark": "#06323A",
+ "deckBLight": "#6FE3F5",
+ "id": "emerald-night",
+ "line": "#1F3F37",
+ "name": "Emerald Night",
+ "panel": "#081813",
+ "text": "#8FBDAE"
+}
