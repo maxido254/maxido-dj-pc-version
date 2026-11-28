@@ -54,6 +54,9 @@ def build(store, base=""):
         if not ID_OK.match(meta["id"]): err(f"skin {f}: bad id '{meta['id']}' (use a-z 0-9 _ - only, max 40)"); continue
         bad = [k for k in COLOR_KEYS if k in meta and not (isinstance(meta[k], str) and COLOR_OK.match(meta[k]))]
         if bad: err(f"skin {f}: colours must look like #RRGGBB: {', '.join(bad)}"); continue
+        lay = meta.get("layout", {})
+        if not isinstance(lay, dict) or not all(isinstance(v, (bool, int, float)) for v in lay.values()): err(f"skin {f}: 'layout' must be an object of true/false/number values"); continue
+        if "shape" in meta and not isinstance(meta["shape"], (int, float)): err(f"skin {f}: 'shape' must be a number 0..2"); continue
         if not any(k in meta for k in COLOR_KEYS): err(f"skin {f}: has no colours"); continue
         dst = os.path.join(files, meta["id"] + ".json")
         with open(dst, "w", encoding="utf-8") as fh: json.dump(meta, fh, indent=1, sort_keys=True)

@@ -13,6 +13,17 @@
    "size": 312518
   },
   {
+   "id": "clean-stage",
+   "type": "skin",
+   "name": "Clean Stage",
+   "author": "Maxido",
+   "desc": "Minimal big-platter layout with square, flat buttons.",
+   "version": 1,
+   "url": "https://raw.githubusercontent.com/maxido254/maxido-dj-pc-version/main/store/files/clean-stage.json?v=e31082e732cf",
+   "sha256": "e31082e732cf9c4e41403beef15f241887356a8bb1e8e0611a2e1fa8ebcf3ca0",
+   "size": 630
+  },
+  {
    "id": "emerald-night",
    "type": "skin",
    "name": "Emerald Night",

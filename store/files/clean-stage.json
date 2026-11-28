@@ -1,0 +1,31 @@
+{
+ "author": "Maxido",
+ "bg": "#0A0A0A",
+ "btnBottom": "#161616",
+ "btnTop": "#1E1E1E",
+ "card": "#1A1A1A",
+ "deckA": "#00D1B2",
+ "deckADark": "#06332D",
+ "deckALight": "#5EF2DA",
+ "deckB": "#FFB000",
+ "deckBDark": "#3D2A00",
+ "deckBLight": "#FFD166",
+ "desc": "Minimal big-platter layout with square, flat buttons.",
+ "id": "clean-stage",
+ "layout": {
+  "deckPct": 36,
+  "refLook": false,
+  "showFxCol": false,
+  "showInfo": true,
+  "showMixer": true,
+  "showStems": false,
+  "showSync": true,
+  "wavePct": 40
+ },
+ "line": "#2A2A2A",
+ "name": "Clean Stage",
+ "panel": "#111111",
+ "shape": 0.3,
+ "text": "#A0A0A0",
+ "version": 1
+}
